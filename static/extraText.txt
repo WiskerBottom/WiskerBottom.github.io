@@ -1,0 +1,45 @@
+scrapped text:
+
+          <p>
+            The goal of this page is to be a tutorial to document the creation of my local homelab.
+            Its primary goals are to host a local AI server, docker containers and other services while not breaking the bank.
+            Should be simple enough right? by the length of this document you can infer that it was not.
+          </p>
+          <p>
+            When first considering building this machine it actually had a different purpose,
+            it was origionally ment to be a local game streaming server as I thought a local AI server would be
+            far to expensive. The purpose only changed when I was looking for ways to sqweeze more GPUs into fewer slots
+            as I was origionally planning to use 7 slim gpus, however I couldn't find any gpus with good preformance and
+            external molex power (the reason I wanted external power is 7 gpus if only using PCIE power can draw up to 525
+            watts, which I don't think can be supplied without supplemented PCIE power which I could not find on server boards).
+            This led to me looking into multi GPU cards like the GTX 690 or R9 295X2 which I found out can usually be passed
+            individually to different VMs. While looking around for cheap dual GPU cards I found that a lot of old server cards
+            used to be dual gpus cards. 
+          </p>
+          <p>
+            In these cards I found the Radeon Pro V340 a dual gpu card based on AMD's Vega series from 2018.
+            Each gpu die was a Vega 56 featuring similarish performance to a GTX 1080 (leagues better than the Quadro M2000), the only
+            drawback is as server cards they don't have any display outputs (arguably important if you want to game on them). However
+            I was already planning on using Steam's in home streaming service to stream to laptops so I didn't have to buy a bunch
+            of new keyboards, mice, monitors and speakers so this shouldn't be a problem, right? (later this would in fact be a large
+            problem). 
+          </p>
+          <p>
+            When I was looking at this GPU I also remembered that the Vega line up all featured HBM2 (high bandwidth memory)
+            giving them a ridiculus memory bandwith of about 409.6 GB/s (compariable to a Mac Studio's 546 GB/s) a very important
+            statistic for running local AI models, so I went and checked Ollama's compatible GPU list and was suprised to see the Radeon
+            Pro V340 listed among the supported GPUs. The V340 also sports 8 GBs of VRAM per gpu die (so 16GB per card) and to make it better
+            unlike gaming workloads Ollama pools VRAM together from multiple gpus into one large VRAM pool. All of this made it look like
+            the ideal card for AI, and it does all of this for $50 while comparible GPUs cost at least $200. There would be some problems
+            but we'll cover those in the V340's section
+          </p>
+          <p>
+            The rest of the system stayed very similar after the switch from game streaming to AI, I went with a supermicro X10DRH-iT as
+            it can fit 6 16x PCIE cards (and a bonus 8x slot), has quad channel memory (again important for memory bandwidth and in turn 
+            AI performance), supports cheap Xeons, had built in graphics, and is a standard E-ATX sizing. To round out the build I got
+            two Xeon E5-2690 v4's and 128 GB of 2133 Mhz ECC DDR4. The cases, power supplies and storage I all had on hand, out of the them
+            I would only recommend the case a Phanteks Ethnoo Pro 2.   
+          </p>
+          <p>
+            This brings the whole system cost to about $700
+          </p>
