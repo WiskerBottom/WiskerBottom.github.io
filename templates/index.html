@@ -1,3 +1,5 @@
+<!-- Hoiiii! please no judge my bad html I'm not a front end designer -->
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -38,21 +40,124 @@
     </aside>
 
     <main class="recipes">		
-      <div class="gradientBox">
+      <div class="lightBlueContainer">
         <div class="textbox">
           <br>
           <h3>Intro</h3>
           <p>
-            The goal of this page is to be a tutorial to document the creation of my local homelab.
-            Its primary goals are to host a local AI server, docker containers on a budget.
-          </p>
-          
-          <h3>Radeon Pro V340</h3>
-          <p>
-
+            The purpose of this page is to be a tutorial to document the creation of my local homelab.
+            The lab's primary goals are to host a local AI server and docker containers on a budget.
           </p>
           <br>
-        </div>
+        </div> <!-- End of textbox for intro --> 
+        <br> 
+        <div class="textbox">
+          <br>
+          <h3>Radeon Pro V340</h3>
+
+
+          <img src="/static/radeonv340_transparent.png" height="400" alt="Radeon Pro V340">
+
+          <p>
+            The Radoen Pro V340 as a server card requires some special work in order for it to work properly.
+            Before you go get into your OS you will need to go to the bios and make sure a couple of settings are
+            changed: 
+          </p>
+
+          <div class="code-box">
+            <code>
+              CSM: Enabled -> Disabled <br>
+              Above 4G Decoding: Disabled -> Enabled 
+            </code>
+          </div>
+
+          <p>
+            Also note this GPU doesn't support windows, so you will need to use linux. To ensure the card is working
+            there are a couple of ways, most basic is to check if the driver loaded correctly. To do this run:
+          </p>
+
+
+          <div class="code-box">
+            <code>
+              $ lspci -v | grep Display -A 24
+            </code>
+          </div>
+
+          <p>
+            In the output look for "Kernel driver in use: amdgpu" (this is not the same as "Kernel modules: amdgpu")
+            if you see that everything should be working. (If you've already set up GPU passthrough this will be vfio-pci 
+            not amdgpu)
+          </p>
+
+          <p>
+            To double check you can run a basic 3D test as follows:
+          </p>
+
+          <div class="code-box">
+            <code>
+              install package <br>
+              $ sudo dnf install vulkan-tools <br>
+              run test (your gpu number may be different, guess from 0 up and check) <br>
+              $ vkcube --gpu_number 1
+            </code>
+          </div>
+
+          <p> if all goes well you should see something like this (note the selected GPU being the V340):</p>
+
+          <img src="/static/vkcube.png" height="400" alt="spinning test cube in vkcube with console showing rendering is on radeon pro v340">
+
+          <br>
+
+        </div> <!-- End of textbox for V340 -->
+        <br>
+        <div class="textbox">
+          <br>
+          <h3>Ollama</h3>
+
+          <img src="/static/ollama.png" height="300" alt="Ollama's llama logo">
+
+          <p>first things first you will need to install Ollama itself, you can do this with the following command:</p>
+
+          <div class="code-box">
+            <code>
+              $ curl -fsSL https://ollama.com/install.sh | sh
+            </code>
+          </div>
+
+          <p>
+            Next as we want this server to be accessible from machines besides this one we will need to tell Ollama
+            to allow connections from non localhost interfaces. To do this we will need to set a enviroment variable.
+          </p>
+          <p>
+            We can do this using systemctl as follows
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ sudo systemctl edit ollama.service
+            </code>
+          </div>
+
+          <p>This should bring up a UI like this:</p>
+
+          <img src="/static/OllamaSystemctlInitialCrop.png" height="400" alt="the inital configuration file for ollama">
+
+          <p>To add the enviroment variable add two new lines at the top of the file like this and then save with ctrl+s:</p>
+
+          <img src="/static/OllamaSystemctlFinishedCropped.png" height="400" alt="the final configuration file for ollama">
+
+          <p>After to apply these changes you will need to run another series of commands</p>
+
+          <div class="code-box">
+            <code>
+              $ sudo systemctl daemon-reload <br>
+              $ sudo systemctl restart ollama.service
+            </code>
+          </div>
+
+          <br>
+        </div> <!-- End of textbox for Server Shrouds -->
+        
       </div>
     </main>
   </div>

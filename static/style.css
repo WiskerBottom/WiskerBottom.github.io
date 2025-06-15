@@ -48,13 +48,13 @@ body {
   flex: 1;
 }
 
-.gradientBox {
-  background: linear-gradient(90deg, #355e3b, #1f4766, #193149);
+.lightBlueContainer {
+  background: #193149;
   padding: 1.5rem;
   border-radius: 8px;
 }
 
-.gradientBox h3 {
+.lightBlueContainer h3 {
   margin: 1rem;
   font-size: 2rem;
   color: #a5d8ff;
@@ -63,7 +63,7 @@ body {
 
 .textbox {
   margin: 1rem;
-  background-color: #333;
+  background-color:  rgb(26,30,43); /* edit here rgb 13, 17, 30 */
   color: #f8f9fa;
   border-radius: 16px;
 }
@@ -82,9 +82,23 @@ body {
   line-height: 1.5; /* Added line-height property to double-space text */
 }
 
-
-.gradientBox img {
-  display: block;
-  margin: 0 auto;
+.lightBlueContainer img {
+  display: block; 
+  background-color: rgba(255,255,255,0.05);
+  margin: 2rem auto; /* Added top and bottom margins */
   border-radius: 16px;
+}
+
+.code-box {
+  margin-left: 5rem;
+  margin-right: 7rem;
+  padding: 1rem;
+  background-color: rgb(36, 39, 51);
+  border-radius: 8px;
+}
+
+.code-box code {
+  font-family: monospace, monaco, consolas, courier new;
+  font-size: 1rem;
+  color: #ffffff;
 }
