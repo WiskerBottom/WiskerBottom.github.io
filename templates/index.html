@@ -18,6 +18,7 @@
     <aside class="sidebar">
       <h2>Index</h2>
       <ul>
+        <br>
         <!-- Example items, to be populated by your backend -->
         <li>Intro</li>
         <li>Radeon Pro V340</li>
@@ -155,9 +156,58 @@
             </code>
           </div>
 
+          <p>
+            After this ollama should be set up and ready to go, you can install and run models with the following
+            commands:
+          </p>
+
+
+          <div class="code-box">
+            <code>
+              install llama3.2:3B <br>
+              $ ollama pull llama3.2:3B <br>
+              run llama3.2:3B, this will bring up CLI for QnA <br>
+              $ ollama run llama3.2:3B
+            </code>
+          </div>
+
+          <p>
+            If the delay from waiting for models to load into memory is a problem you can permenatly load models into
+            memory with the following command:
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ curl http://localhost:11434/api/generate -d '{"model": "llama3.2:3B", "keep_alive": -1}'
+            </code>
+          </div>
+
+          <p>If you ever forget what models are loaded you can use the following to see them:</p>
+
+
+          <div class="code-box">
+            <code>
+              $ ollama ps
+            </code>
+          </div>
+
+          <p>
+            To unload a model from memory you can use this command:
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ curl http://localhost:11434/api/generate -d '{"model": "llama3.2:3B", "keep_alive": -0}'
+            </code>
+          </div>
+
+          <p></p> <!-- for spacing -->
+
           <br>
-        </div> <!-- End of textbox for Server Shrouds -->
+        </div> <!-- End of textbox for Ollama -->
         
+
+
       </div>
     </main>
   </div>
