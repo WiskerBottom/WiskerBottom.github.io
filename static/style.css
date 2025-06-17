@@ -89,6 +89,13 @@ body {
   line-height: 1.5; /* Added line-height property to double-space text */
 }
 
+.textbox li {
+  font-size: 1.1rem;
+  margin-left: 4rem; /* Increased from 1rem to 2rem */
+  margin-right: 4rem; /* Added right margin property */
+  line-height: 1.5; /* Added line-height property to double-space text */
+}
+
 .lightBlueContainer img {
   display: block; 
   background-color: rgba(255,255,255,0.05);
@@ -108,4 +115,9 @@ body {
   font-family: monospace, monaco, consolas, courier new;
   font-size: 1rem;
   color: #ffffff;
+}
+
+a {
+  color: inherit; /* Inherit the text color from the parent element */
+  text-decoration: underline; /* Add an underline to the hyperlink */
 }

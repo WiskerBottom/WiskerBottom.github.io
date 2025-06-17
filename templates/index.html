@@ -205,7 +205,167 @@
 
           <br>
         </div> <!-- End of textbox for Ollama -->
-        
+
+        <div class="textbox"> <!-- Start of textbox for tailscale -->
+          <br>
+
+          <h3>Tailscale</h3>
+          <img src="/static/tailscale.png" height="400" alt="Tailscale logo">
+
+          <br>
+
+          <p>
+            Tailscale is a program that allows you to connect devices across the internet with end to end encryption 
+            without having to open up any ports. In this project I used it for connecting remote PCs to the ollama
+            server and for remote management.
+          </p>
+
+          <p>
+            To install tailscale run this command:
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ curl -fsSL https://tailscale.com/install.sh | sh
+            </code>
+          </div>
+
+          <p>
+            Then set up an account at tailscale's website and use the provided link by the installer to connect your device
+            to your tailnet.
+          </p>
+
+          <p>
+            To turn on tailscale use one of these two commands:
+          </p>
+
+          <div class="code-box">
+            <code>
+              default: <br>
+              $ sudo tailscale up <br>
+              if you want to access the tailnet but not be accessible yourself <br>
+              $ sudo tailscale up --sheilds-up
+            </code>
+          </div>
+
+          <p>
+            from there you can approve new connections from the tailscale admin portal here:
+            <a href="https://login.tailscale.com/admin/machines">Tailscale Website</a> 
+          </p>
+
+          <p>
+            from there just install (and start) tailscale on any machine you want to access your network and you should
+            be good to go.
+          </p>
+
+          <br>
+
+        </div> <!-- End of textbox for tailscale -->
+
+        <div class="textbox"> <!-- Start of textbox for Proxmox -->
+          <br>
+
+          <h3>Proxmox</h3>
+          <img src="/static/proxmox.png" height="400" alt="proxmox logo">
+
+          <p>
+            Proxmox is a linux based operating system used for managing large amounts of virtual machines. This provides extra security,
+            redundancy and performance. It is built for server use and comes with many useful features such as web interface and special
+            kernel patches.
+          </p>
+
+          <p>
+            To begin go to <a href="https://www.proxmox.com/en/downloads/proxmox-virtual-environment/iso">Proxmox's website</a> 
+            and download the latest iso and flash it to a usb drive using an iso flasher of your choosing. The installer should
+            guide you through the installation process, but I'll list a few helpful notes:
+          </p>
+
+          <li>When asked for a DNS server you can just use 1.1.1.1 (Google's DNS)</li>
+          <li>When asked for what IP to use for this machine pick carefully this will be configured as static</li>
+          <li>When asked for a gateway just use your ip with the last part replaced with a 1 (this is your router's IP)</li>
+          <li>When asked for netmask use 255.255.255.0</li>
+          <li>When asked for hostname use home.arpa</li>
+
+          <p>
+            Once you've installed Proxmox upon reboot you should be greeted by some text welcoming you to the proxmox virtual environment.
+            This should also display an IP address, it should look like https://xxx.xxx.xxx.xxx:8006/ this is what you will put in your
+            browser to access the server. Before you do that there are some things we need to configure here first.
+          </p>
+
+          <p>
+            Proxmox by default uses official Proxmox repositories for updating packages and such, these cost money and for hobbiest use
+            the public ones (which are still well maintianed) are perfectly fine. However to use them we will need to make some changes. 
+          </p>
+
+          <p>
+            First navigate to the /etc/apt/sources.list.d directory:
+          </p>
+
+          <div class="code-box">
+            <code>
+              # cd /etc/apt/sources.list.d
+            </code>
+          </div>
+
+          <p>
+            Here you want to delete everything:
+          </p>
+
+          <div class="code-box">
+            <code>
+              # rm *
+            </code>
+          </div>
+
+          <p>
+            We will now edit the /etc/apt/sources.list
+          </p>
+
+          <div class="code-box">
+            <code>
+              # nano /etc/apt/sources.list
+            </code>
+          </div>
+
+          <p>
+            And replace whatever is in it with this (this should be a minor modification):
+          </p>
+
+          <div class="code-box">
+            <code>
+              deb http://ftp.us.debian.org/debian bookworm main contrib non-free-firmware <br>
+              deb http://ftp.us.debian.org/debian bookworm-updates main contrib non-free-firmware <br>
+              <br>
+              # no subscription repo <br>
+              deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription <br>
+              <br>
+              # security updates <br>
+              deb http://security.debian.org bookworm-security main contrib non-free-firmware <br>
+            </code>
+          </div>
+
+          <p>
+            now run this command to solidify all these changes:
+          </p>
+
+          <div class="code-box">
+            <code>
+              # apt update
+            </code>
+          </div>
+
+          <p>
+            ps: if you were trying to install tailscale before this and it wasn't working this was why ;)
+          </p>
+
+          <img src="/static/proxmoxWebUI.png" height="400" alt="proxmox web ui">
+
+          <p>
+
+          </p>
+
+          <br>
+        </div> <!-- End of textbox for Proxmox -->
 
 
       </div>
