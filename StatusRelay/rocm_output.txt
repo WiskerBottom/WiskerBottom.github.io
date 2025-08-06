@@ -1,0 +1,4 @@
+device,GPU Memory Allocated (VRAM%),Memory Activity
+card0,0,N/A
+card1,90,N/A
+

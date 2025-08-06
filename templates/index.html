@@ -716,9 +716,9 @@
 
           <div class="code-box">
             <code>
-                Stop systemd-resolved
-                $ sudo systemctl stop systemd-resolved
-                Prevent it from being started on boot
+                Stop systemd-resolved <br>
+                $ sudo systemctl stop systemd-resolved <br>
+                Prevent it from being started on boot <br>
                 $ sudo systemctl mask systemd-resolved
             </code>
           </div>
@@ -772,8 +772,162 @@
           <p>Now you can access the Pi-hole web ui at: http://SERVER_IP_ADDRESS/admin/login</p>
 
           <br>
-        </div>
+        </div> <!-- pihole -->
 
+        <div class="textbox"> <!-- Seafile -->
+          <br>
+          <h3>Seafile</h3>
+          <img src="/static/seafile-logo.jpg" height="300" alt="seafile logo">
+
+          <p>Seafile is a service that acts like google drive allowing you to upload files to a server for sharing and
+            long term storage.
+          </p>
+
+          <p>Seafile can be setup with a simple docker container making this process simple, first you will need to create
+            your docker-compose.yml file. You can do this as follows:
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ nano docker-compose.yml
+            </code>
+          </div>  
+
+          <p>And use this for the contents of the file:</p>
+
+          <div class="code-box">
+            <code>
+              services: <br>
+                db: <br>
+                  image: mariadb:10.11 <br>
+                  container_name: seafile-mysql <br>
+                  environment: <br>
+                    - MYSQL_ROOT_PASSWORD=db_dev  # Required, set the root's password of MySQL service. <br>
+                    - MYSQL_LOG_CONSOLE=true <br>
+                    - MARIADB_AUTO_UPGRADE=1 <br>
+                  volumes: <br>
+                    - /opt/seafile-mysql/db:/var/lib/mysql  # Required, specifies the path to MySQL data persistent store. <br>
+                  networks: <br>
+                    - seafile-net <br>
+
+                memcached: <br>
+                  image: memcached:1.6.18 <br>
+                  container_name: seafile-memcached <br>
+                  entrypoint: memcached -m 256 <br>
+                  networks: <br>
+                    - seafile-net <br>
+                        
+                seafile: <br>
+                  image: seafileltd/seafile-mc:11.0-latest <br>
+                  container_name: seafile <br>
+                  ports: <br>
+                    - "8080:80" <br>
+              #     - "443:443"  # If https is enabled, cancel the comment. <br>
+                  volumes: <br>
+                    - CHANGE_TO_YOUR_DIRECTORY:/shared   # Required, specifies the path to Seafile data persistent store. <br>
+                  environment: <br>
+                    - DB_HOST=db <br>
+                    - DB_ROOT_PASSWD=db_dev  # Required, the value should be root's password of MySQL service. <br>
+                    - TIME_ZONE=Etc/UTC  # Optional, default is UTC. Should be uncomment and set to your local time zone. <br>
+                    - SEAFILE_ADMIN_EMAIL=me@example.com # Specifies Seafile admin user, default is 'me@example.com'. <br>
+                    - SEAFILE_ADMIN_PASSWORD=asecret     # Specifies Seafile admin password, default is 'asecret'. <br>
+                    - SEAFILE_SERVER_LETSENCRYPT=false   # Whether to use https or not. <br>
+                    - SEAFILE_SERVER_HOSTNAME=docs.seafile.com # Specifies your host name if https is enabled. <br>
+                  depends_on: <br>
+                    - db <br>
+                    - memcached <br>
+                  networks: <br>
+                    - seafile-net <br>
+
+              networks: <br>
+                seafile-net: <br>
+            </code>
+          </div>
+          
+          <p>In this compose file the only thing you have to change is under volumes, the CHANGE_TO_YOUR_DIRECTORY part,
+            there you should put wherever you want the actual stuff you upload to seafile to go, this is how you can tell Seafile
+            to store its data on other disks if desired.
+
+            If you want to store your data on multiple disks at once I have heard people use LVM to group disks together and then
+            pointing seafile at that, but I haven't tried it myself.
+          </p>
+
+          <p>As an aside some Linux distros come with SELinux enabled which prevents docker from writing in mounted volumes
+            as a brute force method you can just turn of SELinux which will solve the problem or you can change the context
+            of the files to allow them to be written to. The command I used for this was (doing the later, changing the
+            context):
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ sudo chcon -Rt container_file_t DIRECTORY_TO_MOUNT <br>
+            </code>
+          </div>  
+
+          <p>Once you do this you can settup the systemclt service to run this program on startup:</p>
+
+
+          <div class="code-box">
+            <code>
+                $ sudo nano /etc/systemd/system/seafile.service
+            </code>
+          </div>          
+
+          <p>Then paste the following text:</p>
+
+          <div class="code-box">
+            <code>
+              # /etc/systemd/system/docker-compose-app.service <br>
+
+              [Unit] <br>
+              Description=Docker Compose Application Service <br>
+              Requires=docker.service <br>
+              After=docker.service <br>
+
+              [Service] <br>
+              Type=oneshot <br>
+              RemainAfterExit=yes <br>
+              WorkingDirectory=THE_DIRECTORY_YOU_DOWNLOADED_THE_DOCKER_COMPOSE_TO! <br>
+              ExecStart=/bin/docker-compose up <br>
+              ExecStop=/bin/docker-compose down <br>
+              TimeoutStartSec=0 <br>
+
+              [Install] <br>
+              WantedBy=multi-user.target <br>
+            </code>
+          </div>              
+
+          <p>Then save and exit with ctrl+s and then ctrl+x</p>
+
+          <p>Then update systemctl with these changes and start seafile.service:</p>
+
+          <div class="code-box">
+            <code>
+              $ sudo systemctl daemon-reload <br>
+              $ sudo systemctl enable seafile.service<br>
+              $ sudo systemctl restart seafile.service
+            </code>
+          </div>
+
+          <p>Now your seafile instance should (hopefully) be up and running. You can access it at http://localhost:8080</p>
+
+          <p>The last thing to configure is the SERVICE_URL and FILE_SERVER_ROOT in the webui. You can find these by going
+            to the top left clicking on the profile icon and then selecting System Admin and then on the middle left select
+            settings and you should be greeted with something like this:
+          </p>
+
+          <img src="/static/Seafile_AdminSettings.png" height="300" alt="seafile admin settings panel">
+
+          <p>in the SERVICE_URL and FILE_SERVER_ROOT spaces make sure you have http://SERVER_IP:8080 for SERVICE_URL and  
+              http://SERVER_IP:8080/seafhttp for FILE_SERVER_ROOT. I don't know why these aren't automatically assigned but
+              if they are improperly assigned then file upload will not work (arguably pretty important for a NAS ;P)
+          </p>
+
+          <p>Now seafile should be ready to go! I will also note that seafile has apps you can run on your PC and phone if
+            you don't want to always have to go through the website.
+          </p>
+
+          <br>
       </div>
     </main>
   </div>
