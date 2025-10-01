@@ -1,0 +1,935 @@
+<!-- Hoiiii! please no judge my bad html I'm not a front end designer -->
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">Home</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>Index</h2>
+      <ul>
+        <br>
+        <li>Intro</li>
+        <li>Radeon Pro V340</li>
+        <li>Ollama</li>
+		    <li>Tailscale</li>
+        <li>Proxmox</li>
+        <li>GPU Passthrough</li>
+        <li>Docker</li>
+        <li>Open-Webui</li>
+        <li>Seafile</li>
+        <li>PiHole</li>
+        <li>Vscode Copilot</li>
+		    <li>Navigation Portal</li>
+	    </ul>
+    </aside>
+
+    <main class="recipes">		
+      <div class="lightBlueContainer">
+        <div class="textbox">
+          <br>
+          <h3>Intro</h3>
+          <p>
+            The purpose of this page is to be a tutorial to document the creation of my local homelab.
+            The lab's primary goals are to host a local AI server and docker containers on a budget.
+          </p>
+          <br>
+        </div> <!-- End of textbox for intro --> 
+        <br> 
+        <div class="textbox">
+          <br>
+          <h3>Radeon Pro V340</h3>
+
+
+          <img src="/static/radeonv340_transparent.png" height="400" alt="Radeon Pro V340">
+
+          <p>
+            The Radoen Pro V340 as a server card requires some special work in order for it to work properly.
+            Before you go get into your OS you will need to go to the bios and make sure a couple of settings are
+            changed: 
+          </p>
+
+          <div class="code-box">
+            <code>
+              CSM: Enabled -> Disabled <br>
+              Above 4G Decoding: Disabled -> Enabled 
+            </code>
+          </div>
+
+          <p>
+            Also note this GPU doesn't support windows, so you will need to use linux. To ensure the card is working
+            there are a couple of ways, most basic is to check if the driver loaded correctly. To do this run:
+          </p>
+
+
+          <div class="code-box">
+            <code>
+              $ lspci -v | grep Display -A 24
+            </code>
+          </div>
+
+          <p>
+            In the output look for "Kernel driver in use: amdgpu" (this is not the same as "Kernel modules: amdgpu")
+            if you see that everything should be working. (If you've already set up GPU passthrough this will be vfio-pci 
+            not amdgpu)
+          </p>
+
+          <p>
+            To double check you can run a basic 3D test as follows:
+          </p>
+
+          <div class="code-box">
+            <code>
+              install package <br>
+              $ sudo dnf install vulkan-tools <br>
+              run test (your gpu number may be different, guess from 0 up and check) <br>
+              $ vkcube --gpu_number 1
+            </code>
+          </div>
+
+          <p> if all goes well you should see something like this (note the selected GPU being the V340):</p>
+
+          <img src="/static/vkcube.png" height="400" alt="spinning test cube in vkcube with console showing rendering is on radeon pro v340">
+
+          <br>
+
+        </div> <!-- End of textbox for V340 -->
+        <br>
+        <div class="textbox">
+          <br>
+          <h3>Ollama</h3>
+
+          <img src="/static/ollama.png" height="300" alt="Ollama's llama logo">
+
+          <p>first things first you will need to install Ollama itself, you can do this with the following command:</p>
+
+          <div class="code-box">
+            <code>
+              $ curl -fsSL https://ollama.com/install.sh | sh
+            </code>
+          </div>
+
+          <p>
+            Next as we want this server to be accessible from machines besides this one we will need to tell Ollama
+            to allow connections from non localhost interfaces. To do this we will need to set a enviroment variable.
+          </p>
+          <p>
+            We can do this using systemctl as follows
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ sudo systemctl edit ollama.service
+            </code>
+          </div>
+
+          <p>This should bring up a UI like this:</p>
+
+          <img src="/static/OllamaSystemctlInitialCrop.png" height="400" alt="the inital configuration file for ollama">
+
+          <p>To add the enviroment variable add two new lines at the top of the file like this and then save with ctrl+s:</p>
+
+          <img src="/static/OllamaSystemctlFinishedCropped.png" height="400" alt="the final configuration file for ollama">
+
+          <p>After to apply these changes you will need to run another series of commands</p>
+
+          <div class="code-box">
+            <code>
+              $ sudo systemctl daemon-reload <br>
+              $ sudo systemctl restart ollama.service
+            </code>
+          </div>
+
+          <p>
+            After this ollama should be set up and ready to go, you can install and run models with the following
+            commands:
+          </p>
+
+
+          <div class="code-box">
+            <code>
+              install llama3.2:3B <br>
+              $ ollama pull llama3.2:3B <br>
+              run llama3.2:3B, this will bring up CLI for QnA <br>
+              $ ollama run llama3.2:3B
+            </code>
+          </div>
+
+          <p>
+            If the delay from waiting for models to load into memory is a problem you can permenatly load models into
+            memory with the following command:
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ curl http://localhost:11434/api/generate -d '{"model": "llama3.2:3B", "keep_alive": -1}'
+            </code>
+          </div>
+
+          <p>If you ever forget what models are loaded you can use the following to see them:</p>
+
+
+          <div class="code-box">
+            <code>
+              $ ollama ps
+            </code>
+          </div>
+
+          <p>
+            To unload a model from memory you can use this command:
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ curl http://localhost:11434/api/generate -d '{"model": "llama3.2:3B", "keep_alive": -0}'
+            </code>
+          </div>
+
+          <p></p> <!-- for spacing -->
+
+          <br>
+        </div> <!-- End of textbox for Ollama -->
+
+        <div class="textbox"> <!-- Start of textbox for tailscale -->
+          <br>
+
+          <h3>Tailscale</h3>
+          <img src="/static/tailscale.png" height="400" alt="Tailscale logo">
+
+          <br>
+
+          <p>
+            Tailscale is a program that allows you to connect devices across the internet with end to end encryption 
+            without having to open up any ports. In this project I used it for connecting remote PCs to the ollama
+            server and for remote management.
+          </p>
+
+          <p>
+            To install tailscale run this command:
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ curl -fsSL https://tailscale.com/install.sh | sh
+            </code>
+          </div>
+
+          <p>
+            Then set up an account at tailscale's website and use the provided link by the installer to connect your device
+            to your tailnet.
+          </p>
+
+          <p>
+            To turn on tailscale use one of these two commands:
+          </p>
+
+          <div class="code-box">
+            <code>
+              default: <br>
+              $ sudo tailscale up <br>
+              if you want to access the tailnet but not be accessible yourself <br>
+              $ sudo tailscale up --sheilds-up
+            </code>
+          </div>
+
+          <p>
+            from there you can approve new connections from the tailscale admin portal here:
+            <a href="https://login.tailscale.com/admin/machines">Tailscale Website</a> 
+          </p>
+
+          <p>
+            from there just install (and start) tailscale on any machine you want to access your network and you should
+            be good to go.
+          </p>
+
+          <br>
+
+        </div> <!-- End of textbox for tailscale -->
+
+        <div class="textbox"> <!-- Start of textbox for Proxmox -->
+          <br>
+
+          <h3>Proxmox</h3>
+          <img src="/static/proxmox.png" height="400" alt="proxmox logo">
+
+          <p>
+            Proxmox is a linux based operating system used for managing large amounts of virtual machines. This provides extra security,
+            redundancy and performance. It is built for server use and comes with many useful features such as web interface and special
+            kernel patches.
+          </p>
+
+          <p>
+            To begin go to <a href="https://www.proxmox.com/en/downloads/proxmox-virtual-environment/iso">Proxmox's website</a> 
+            and download the latest iso and flash it to a usb drive using an iso flasher of your choosing. The installer should
+            guide you through the installation process, but I'll list a few helpful notes:
+          </p>
+
+          <li>When asked for a DNS server you can just use 1.1.1.1 (Cloudflares's DNS)</li>
+          <li>When asked for what IP to use for this machine pick carefully this will be configured as static</li>
+          <li>When asked for a gateway just use your ip with the last part replaced with a 1 (this is your router's IP)</li>
+          <li>When asked for netmask use 255.255.255.0</li>
+          <li>When asked for hostname use home.arpa</li>
+
+          <p>
+            Once you've installed Proxmox upon reboot you should be greeted by some text welcoming you to the proxmox virtual environment.
+            This should also display an IP address, it should look like https://xxx.xxx.xxx.xxx:8006/ this is what you will put in your
+            browser to access the server. Before you do that there are some things we need to configure here first.
+          </p>
+
+          <p>
+            Proxmox by default uses official Proxmox repositories for updating packages and such, these cost money and for hobbiest use
+            the public ones (which are still well maintianed) are perfectly fine. However to use them we will need to make some changes. 
+          </p>
+
+          <p>
+            First navigate to the /etc/apt/sources.list.d directory:
+          </p>
+
+          <div class="code-box">
+            <code>
+              # cd /etc/apt/sources.list.d
+            </code>
+          </div>
+
+          <p>
+            Here you want to delete everything:
+          </p>
+
+          <div class="code-box">
+            <code>
+              # rm *
+            </code>
+          </div>
+
+          <p>
+            We will now edit the /etc/apt/sources.list
+          </p>
+
+          <div class="code-box">
+            <code>
+              # nano /etc/apt/sources.list
+            </code>
+          </div>
+
+          <p>
+            And replace whatever is in it with this (this should be a minor modification):
+          </p>
+
+          <div class="code-box">
+            <code>
+              deb http://ftp.us.debian.org/debian bookworm main contrib non-free-firmware <br>
+              deb http://ftp.us.debian.org/debian bookworm-updates main contrib non-free-firmware <br>
+              <br>
+              # no subscription repo <br>
+              deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription <br>
+              <br>
+              # security updates <br>
+              deb http://security.debian.org bookworm-security main contrib non-free-firmware <br>
+            </code>
+          </div>
+
+          <p>
+            now run this command to solidify all these changes:
+          </p>
+
+          <div class="code-box">
+            <code>
+              # apt update
+            </code>
+          </div>
+
+          <p>
+            ps: if you were trying to install tailscale (or anything else using apt) before this and it wasn't working this was why ;)
+          </p>
+
+          <p>
+            Now go to the web ui at the IP address mentioned earlier and you should see something like this:
+          </p>
+
+          <img src="/static/proxmoxWebUI.png" height="400" alt="proxmox web ui">
+
+          <p>
+            To create VMs from here is fairly simple, go to the top right and click on the blue Create VM button and follow the steps it gives you. 
+            Still, I will list some tips:
+          </p>
+
+          <li>To upload ISOs go to local, it should be below your VMs, and click ISO Images and then Upload in the top left</li>
+          <li>
+            If you have multiple disks in your system go to your node (directly above the VMs) then click on disks and then
+            wipe the disk, after that when creating a new VM disk it should show up as an option.
+          </li>
+          <li>When choosing the CPU type pick Host</li>
+          <li>When choosing the Machine type pick q35</lHosti>
+          <li>When choosing the BIOS use UEFI</li>
+
+          <br>
+          <h3>GPU Passthrough</h3>
+          <br>
+
+          <p>
+            If you want to have a AI server running in a VM you're going to need some GPUs, GPU passthrough is a little bit tricky but
+            I'll try to guide you through it.
+          </p>
+
+          <p>
+            To start get to a terminal of the proxmox host, you can do this by either SSH-ing into it or plugging a display and keyboard into
+            the proxmox server itself.
+          </p>
+
+          <p>
+            Next you're going to need to edit your grub files. You can do this with this command: 
+          </p>
+
+          <div class="code-box">
+            <code>
+                # nano /etc/default/grub
+            </code>
+          </div>          
+
+          <p>
+            In this file you're going to make a few changes, look for the line that starts with GRUB_CMDLINE_LINUX_DEFAULT and replace it with
+            this:
+          </p>
+
+          <div class="code-box">
+            <code>
+                GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on"<br>
+                (or if you are on an AMD CPU)<br>
+                GRUB_CMDLINE_LINUX_DEFAULT="quiet amd_iommu=on"
+            </code>
+          </div>
+          
+          <p>
+            Once you've done this implement your changes with this command:
+          </p>
+
+          <div class="code-box">
+            <code>
+                # update-grub
+            </code>
+          </div>
+          
+          <p>
+            We will then need to edit /etc/modules using this command
+          </p>
+
+          <div class="code-box">
+            <code>
+                # printf "vfio\nvfio_iommu_type1\nvfio_pci\nvfio_virqfd" >> /etc/modules
+            </code>
+          </div>         
+          
+          <p>
+            You will then need to use these command to change /etc/modprobe.d/kvm.conf
+          </p>
+
+          <div class="code-box">
+            <code>
+                # echo "options vfio_iommu_type1 allow_unsafe_interrupts=1" > /etc/modprobe.d/iommu_unsafe_interrupts.conf <br>
+                # echo "options kvm ignore_msrs=1" > /etc/modprobe.d/kvm.conf
+            </code>
+          </div>  
+          
+          <p>
+            We will then need to tell proxmox to not use our GPUs as we want to pass them to our VMs. Please note that if you
+            disable the GPU you are currently using this will cause the console to become unresponsive. If you aren't using SSH
+            start doing that now. (Some server boards come with special integrated graphics in which case they will remain functional).
+          </p>
+
+          <div class="code-box">
+            <code>
+                # printf "blacklist radeon\nblacklist nouveau\nblacklist nvidia" >> /etc/modprobe.d/blacklist.conf
+            </code>
+          </div>           
+
+          <p>
+            After this we will need to add our GPUs to /etc/modprobe.d/vfio.conf. To list your vendor ID use lscpi -v (if you have a lot of
+            pci devices use lspci -v | grep Display -A 24 or lspci -v | grep VGA -A 24 to search):
+          </p>
+
+          <div class="code-box">
+            <code>
+                # lspci -v
+            </code>
+          </div> 
+
+          <p>
+            Look for the name of the gpu you are looking for in the first line of each block and "VGA", for an example this is my laptop's GPU: 
+          </p>
+
+          <img src="/static/lspciOutput.png" height="150" alt="an example lspci output">
+
+          <p>
+            Then take the number at the start of that block (in my case 03:00) and run them through another lspci command
+          </p>
+
+          <div class="code-box">
+            <code>
+                # lspci -n -s xx:xx (<- your number here)
+            </code>
+          </div>
+
+          <p>
+            You should get an output like this (Note: If you have multiple of the same GPUs the vendor IDs will be the same for all GPUs):
+          </p>
+
+          <img src="/static/lspciExampleOutput.png" height="50" alt="another more different example lspci output">
+
+          <p>
+            Then you will need to take the vendor IDs and (in my case 1002:7480 and 1002:ab30) use them in this command:
+          </p>
+
+          <div class="code-box">
+            <code>
+                # echo "options vfio-pci ids=xxxx:xxxx,yyyy:yyyy disable_vga=1"> /etc/modprobe.d/vfio.conf
+            </code>
+          </div>
+
+          <p>
+            Finally run this to put your changes into affect:
+          </p>
+
+          <div class="code-box">
+            <code>
+                set changes into affect <br>
+                # update-initramfs -u <br>
+                reboot your system <br>
+                # reboot -h now 
+            </code>
+          </div>
+
+          <p>Note: if you are using a Server GPU with no outputs (like the V340 mentioned earlier) 
+            then you will need to install Fedora Workstation 42 if you want the proxmox webui screen monitor
+          to continue working (which you probably do if you have no display outputs). 
+          Do not ask me why it works on Fedora Workstation 42 specifically I don't
+          know, but I can tell you I tried the following: Fedora Workstation 40, Fedora KDE 42, Debian, Ubuntu,
+          Bazzite and Pop OS. Also note when Proxmox's screen monitor is working it creates virtual displays that can be used
+          for steam in home streaming and other remote screen sharing applications.
+         </p>
+
+          <br>
+        </div> <!-- End of textbox for Proxmox -->
+
+        <div class="textbox"> <!-- Start of textbox for ROCM -->
+          <br> <!--for spacing-->
+          <h3>ROCM</h3>
+
+          <img src="/static/ROCM_Logo.png" alt="AMD ROCM Logo">       
+
+          <p>ROCM is a piece of software that adds extra opimizations for doing high performance computing which is useful in our senario for
+            AI applications. 
+          </p>
+
+          <p>These instructions will be for Fedora Workstation 42 and will differ depending on which OS you're using.</p>
+
+          <p>In Fedora for some reason the packages for ROCM are split into a myriad of smaller packages to install them all use this command:</p>
+
+          <div class="code-box">
+            <code>
+                $ sudo dnf install hipblas-devel hipblaslt-devel hipcc hipcc-libomp-devel hipcub-devel hipfft-devel hipfort-devel hiprand-devel hiprt-devel hipsolver-devel hipsparse-devel rocalution-devel rocblas-devel rocfft-devel rocm-clang-devel rocm-clang-tools-extra-devel rocm-cmake rocm-comgr-devel rocm-core-devel rocm-hip-devel rocm-libc++-devel rocm-libc++-static rocm-llvm-devel rocm-omp-devel rocm-runtime-devel rocm-rpp-devel rocm-smi-devel rocminfo rocdecode-devel rocjpeg-devel rocprim-devel rocrand-devel rocsolver-devel rocsparse-devel rocthrust-devel roctracer-devel miopen
+            </code>
+          </div>
+
+          <p>After, run this command and make sure you get an output, if you do ROCM is working properly.</p>
+
+          <div class="code-box">
+            <code>
+                $ rocminfo
+            </code>
+          </div>
+
+          <p>Note: I've seen some guides that say you need to install AMD's special drivers from their website, this is not true, ROCM works with the open source amdgpu drivers.</p>
+
+          <br> <!--</div>for spacing-->
+        </div> <!-- End of textbox for ROCM -->
+
+        <div class="textbox"> <!-- Start of textbox for llama.cpp -->
+          <br> <!-- For spacing -->
+          <h3>llama.cpp</h3>
+          <img src="/static/llama.cpp.png" height="250" alt="llama.cpp Logo">       
+
+          <p>Wait didn't we set up ollama for AI earlier? Yes, but ollama does not support ROCM and is actually just a wrapper around llama.cpp. Running llama.cpp directly gives us extra performance and allows us to tweak settings ollama hides.</p>
+
+          <p>
+            If we wan't ROCM support, which we do for AMD GPUs, we will need to build from source as the prebuilt packages don't support ROCM only
+            Vulkan. Thankfully this isn't hard thanks to llama.cpp's <a href="https://github.com/osllmai/llama.cpp/blob/main/docs/build.md">excellent documentation.</a> 
+          </p>
+
+          <p>First you will need to pull the llama.cpp source code with the following:</p>
+
+          <div class="code-box">
+            <code>
+              $ git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp
+            </code>
+          </div>
+
+          <p>This next command builds llama.cpp: (this may take some time)</p>
+
+          <div class="code-box">
+            <code>
+                $ HIPCXX="$(hipconfig -l)/clang" HIP_PATH="$(hipconfig -R)" cmake -S . -B build -DGGML_HIP=ON -DAMDGPU_TARGETS=gfx900 -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release -- -j 16
+            </code>
+          </div>
+
+          <p>Make sure you change gfx900 to your gpu's Shader ISA (you can find this on techpowerup) and -j 16 to however many threads you can throw at this.</p>
+
+          <p>Once that finishes navigate into the build directory and from there in to bin and then run this as a test: (this will install gemma-3-1B as a test and run it)</p>
+
+          <div class="code-box">
+            <code>
+              $ ./llama-cli -hf ggml-org/gemma-3-1b-it-GGUF
+            </code>
+          </div>
+
+          <p>If this runs without a hitch check your gpu utilization and make sure when asking a question the GPU is being utilized
+            (I use <a href="https://flathub.org/apps/io.missioncenter.MissionCenter">Mission Center</a> for this)
+          </p>
+
+          <p>Notes:</p>
+
+          <p>I've had some issues where even when told to offload zero gpus layers llama.cpp will use VRAM despite supposedly not using the
+            GPUS. To fix this you can use a command to hide the GPUS from the current command youre running, append this to the start of your
+            command to hide the GPUS:
+          </p>
+
+          <div class="code-box">
+            <code>
+              for AMD gpus <br>
+              $ HIP_VISIBLE_DEVICES="" (your command) <br>
+              for NVIDIA gpus <br>
+              CUDA_VISIBLE_DEVICES="" (your command) <br>
+            </code>
+          </div>
+
+          <p>If you're using AMD gpus I find the rocm-smi command to be useful for monitoring VRAM, temps and utilization. This simple command runs it every 2 second and displays the result over and over again:</p>
+
+          <div class="code-box">
+            <code>
+              $ watch rocm-smi
+            </code>
+          </div>
+
+          <p>also llama.cpp has a small army of parameters that you can pass to modify how models behave. To see all of them use this command:</p>
+
+          <div class="code-box">
+            <code>
+              Make sure you are in the /build/bin directory! <br>
+              $ ./llama-cli -h
+            </code>
+          </div>    
+          
+          <p>If you want to use llama.cpp with Open WebUI you will need to use llama-server, as an example of a command you could use here is mine (node the --port xxxxx and --host 0.0.0.0):</p>
+
+          <div class="code-box">
+            <code>
+              Make sure you are in the /build/bin directory! <br>
+              $ ./llama-server -hf unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF:Q4_0 -ngl 99 --host 0.0.0.0 --port 10000 -c 8196 --temp 0.6 --top-k 20 --top-p 0.95 --min-p 0 --cache-type-k q4_0 --cache-type-v q4_0 --flash-attn
+            </code>
+          </div>            
+
+          <p>
+            Reddit posts I have found useful (<3 r/LocalLLaMA): <br>
+            <a href="https://www.reddit.com/r/LocalLLaMA/comments/1dalkm8/memory_tests_using_llamacpp_kv_cache_quantization/">KV quantization</a>,
+            <a href="https://www.reddit.com/r/LocalLLaMA/comments/1m8vu80/n_n_size_gpu_2n_sized_gpu_go_big_if_you_can/">Many GPU setup tips</a>
+
+          </p>
+
+          <br><br> <!-- For spacing -->
+        </div> <!-- End llama.cpp-->
+
+        <div class="textbox"> <!-- Open WebUI -->
+          <br>
+
+          <h3>Open WebUI</h3>
+          <img src="/static/openwebui.png" height="300" alt="open webui logo">       
+
+          <p>For Open WebUI we use a docker container to keep it simple, to pull the newest version of the contianer use:</p>
+
+          <div class="code-box">
+            <code>
+                $ docker pull ghcr.io/open-webui/open-webui:main
+            </code>
+          </div>
+
+          <p>To create and start the docker container I use these parameters:</p>
+
+          <div class="code-box">
+            <code>
+                $ docker run -d --net=host -v open-webui:/app/backend/data -e HOST='0.0.0.0' --name open-webui --restart always ghcr.io/open-webui/open-webui:main
+            </code>
+          </div>
+
+          <p>The only interesting thing to note here is the host ip being set to 0.0.0.0, this tell Open-WebUI to take requests coming from any interface (local network or tailscale) </p>
+
+          <p>Once this is done type http://your-ip-address:8080/ and you will be greeted by Open-WebUI, from here you can create your admin 
+            account. However we are not done yet, since we are running out AI models separate from the Open-WebUI contianer we will need to
+            tell Open-WebUI where to send its AI queries.
+          </p>
+
+          <p>To do this go to the bottom left and open the Admin Panel:</p>
+
+          <img src="/static/OWUI_AdminPanel.png" height="300" alt="photo of location of admin ui button">
+
+          <p>Then add a new openAI API connection in this submenu:</p>
+
+          <img src="/static/openAI_AddModel.png" width="1000" alt="photo of location of openAI add connection button">
+
+          <p>Then continue to add your ip (with the port specified when launching llama.cpp) here and save after:</p>
+
+          <img src="/static/openAI_AddModel_2.png" height="300" alt="photo of where to put IP in submenu">
+
+          <p>Now you can go back to chat and your model should appear in the model menu in the top left. You can also go back to the Admin Panel
+            and give it a profile picture and a shortened name if you would like (by default the name is the full hugging face directory which is typically
+            very long).
+          </p>
+
+          <br>
+        </div> <!-- End OpenWeb-UI-->
+
+        <div class="textbox"> <!-- pihole -->
+          <br>
+
+          <h3>Pi-hole</h3>
+
+          <img src="/static/pihole_logo.png" height="300" alt="pihole logo">
+
+          <p>Pi-hole is a DNS service that blocks requests to servers known to host adds, practically it is a system wide ad block.</p>
+
+          <p>To run this service Pi-hole provides a docker contianer that makes it simple, you can get it <a href="https://docs.pi-hole.net/docker/">here</a>.</p>
+
+          <p>Once you get it remember to change the password in the docker-compose file!</p>
+
+          <p>When you first try to launch the contianer you may get an error where it complains about not being able to bind to port 53,
+            this occurs because many linux distros come with a build in DNS system which will need to be disabled before Pi-hole can be run.
+            Luckly with a few command we can get this done:
+          </p>
+
+          <div class="code-box">
+            <code>
+                Stop systemd-resolved <br>
+                $ sudo systemctl stop systemd-resolved <br>
+                Prevent it from being started on boot <br>
+                $ sudo systemctl mask systemd-resolved
+            </code>
+          </div>
+
+          <p>Now, we want this docker contianer to boot on system startup so we will setup a systemctl script to do this. This can be created
+            with the following commands
+          </p>
+
+          <div class="code-box">
+            <code>
+                $ sudo nano /etc/systemd/system/pihole.service
+            </code>
+          </div>          
+
+          <p>Then paste the following text:</p>
+
+          <div class="code-box">
+            <code>
+              # /etc/systemd/system/docker-compose-app.service <br>
+
+              [Unit] <br>
+              Description=Docker Compose Application Service <br>
+              Requires=docker.service <br>
+              After=docker.service <br>
+
+              [Service] <br>
+              Type=oneshot <br>
+              RemainAfterExit=yes <br>
+              WorkingDirectory=THE_DIRECTORY_YOU_DOWNLOADED_THE_DOCKER_COMPOSE_TO! <br>
+              ExecStart=/bin/docker-compose up <br>
+              ExecStop=/bin/docker-compose down <br>
+              TimeoutStartSec=0 <br>
+
+              [Install] <br>
+              WantedBy=multi-user.target <br>
+            </code>
+          </div>              
+
+          <p>Then save and exit with ctrl+s and then ctrl+x</p>
+
+          <p>Then update systemctl with these changes and start pihole.service:</p>
+
+          <div class="code-box">
+            <code>
+              $ sudo systemctl daemon-reload <br>
+              $ sudo systemctl enable pihole.service<br>
+              $ sudo systemctl restart pihole.service
+            </code>
+          </div>  
+
+          <p>Now you can access the Pi-hole web ui at: http://SERVER_IP_ADDRESS/admin/login</p>
+
+          <br>
+        </div> <!-- pihole -->
+
+        <div class="textbox"> <!-- Seafile -->
+          <br>
+          <h3>Seafile</h3>
+          <img src="/static/seafile-logo.jpg" height="300" alt="seafile logo">
+
+          <p>Seafile is a service that acts like google drive allowing you to upload files to a server for sharing and
+            long term storage.
+          </p>
+
+          <p>Seafile can be setup with a simple docker container making this process simple, first you will need to create
+            your docker-compose.yml file. You can do this as follows:
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ nano docker-compose.yml
+            </code>
+          </div>  
+
+          <p>And use this for the contents of the file:</p>
+
+          <div class="code-box">
+            <code>
+              services: <br>
+                db: <br>
+                  image: mariadb:10.11 <br>
+                  container_name: seafile-mysql <br>
+                  environment: <br>
+                    - MYSQL_ROOT_PASSWORD=db_dev  # Required, set the root's password of MySQL service. <br>
+                    - MYSQL_LOG_CONSOLE=true <br>
+                    - MARIADB_AUTO_UPGRADE=1 <br>
+                  volumes: <br>
+                    - /opt/seafile-mysql/db:/var/lib/mysql  # Required, specifies the path to MySQL data persistent store. <br>
+                  networks: <br>
+                    - seafile-net <br>
+
+                memcached: <br>
+                  image: memcached:1.6.18 <br>
+                  container_name: seafile-memcached <br>
+                  entrypoint: memcached -m 256 <br>
+                  networks: <br>
+                    - seafile-net <br>
+                        
+                seafile: <br>
+                  image: seafileltd/seafile-mc:11.0-latest <br>
+                  container_name: seafile <br>
+                  ports: <br>
+                    - "8080:80" <br>
+              #     - "443:443"  # If https is enabled, cancel the comment. <br>
+                  volumes: <br>
+                    - CHANGE_TO_YOUR_DIRECTORY:/shared   # Required, specifies the path to Seafile data persistent store. <br>
+                  environment: <br>
+                    - DB_HOST=db <br>
+                    - DB_ROOT_PASSWD=db_dev  # Required, the value should be root's password of MySQL service. <br>
+                    - TIME_ZONE=Etc/UTC  # Optional, default is UTC. Should be uncomment and set to your local time zone. <br>
+                    - SEAFILE_ADMIN_EMAIL=me@example.com # Specifies Seafile admin user, default is 'me@example.com'. <br>
+                    - SEAFILE_ADMIN_PASSWORD=asecret     # Specifies Seafile admin password, default is 'asecret'. <br>
+                    - SEAFILE_SERVER_LETSENCRYPT=false   # Whether to use https or not. <br>
+                    - SEAFILE_SERVER_HOSTNAME=docs.seafile.com # Specifies your host name if https is enabled. <br>
+                  depends_on: <br>
+                    - db <br>
+                    - memcached <br>
+                  networks: <br>
+                    - seafile-net <br>
+
+              networks: <br>
+                seafile-net: <br>
+            </code>
+          </div>
+          
+          <p>In this compose file the only thing you have to change is under volumes, the CHANGE_TO_YOUR_DIRECTORY part,
+            there you should put wherever you want the actual stuff you upload to seafile to go, this is how you can tell Seafile
+            to store its data on other disks if desired.
+
+            If you want to store your data on multiple disks at once I have heard people use LVM to group disks together and then
+            pointing seafile at that, but I haven't tried it myself.
+          </p>
+
+          <p>As an aside some Linux distros come with SELinux enabled which prevents docker from writing in mounted volumes
+            as a brute force method you can just turn of SELinux which will solve the problem or you can change the context
+            of the files to allow them to be written to. The command I used for this was (doing the later, changing the
+            context):
+          </p>
+
+          <div class="code-box">
+            <code>
+              $ sudo chcon -Rt container_file_t DIRECTORY_TO_MOUNT <br>
+            </code>
+          </div>  
+
+          <p>Once you do this you can settup the systemclt service to run this program on startup:</p>
+
+
+          <div class="code-box">
+            <code>
+                $ sudo nano /etc/systemd/system/seafile.service
+            </code>
+          </div>          
+
+          <p>Then paste the following text:</p>
+
+          <div class="code-box">
+            <code>
+              # /etc/systemd/system/docker-compose-app.service <br>
+
+              [Unit] <br>
+              Description=Docker Compose Application Service <br>
+              Requires=docker.service <br>
+              After=docker.service <br>
+
+              [Service] <br>
+              Type=oneshot <br>
+              RemainAfterExit=yes <br>
+              WorkingDirectory=THE_DIRECTORY_YOU_DOWNLOADED_THE_DOCKER_COMPOSE_TO! <br>
+              ExecStart=/bin/docker-compose up <br>
+              ExecStop=/bin/docker-compose down <br>
+              TimeoutStartSec=0 <br>
+
+              [Install] <br>
+              WantedBy=multi-user.target <br>
+            </code>
+          </div>              
+
+          <p>Then save and exit with ctrl+s and then ctrl+x</p>
+
+          <p>Then update systemctl with these changes and start seafile.service:</p>
+
+          <div class="code-box">
+            <code>
+              $ sudo systemctl daemon-reload <br>
+              $ sudo systemctl enable seafile.service<br>
+              $ sudo systemctl restart seafile.service
+            </code>
+          </div>
+
+          <p>Now your seafile instance should (hopefully) be up and running. You can access it at http://localhost:8080</p>
+
+          <p>The last thing to configure is the SERVICE_URL and FILE_SERVER_ROOT in the webui. You can find these by going
+            to the top left clicking on the profile icon and then selecting System Admin and then on the middle left select
+            settings and you should be greeted with something like this:
+          </p>
+
+          <img src="/static/Seafile_AdminSettings.png" height="300" alt="seafile admin settings panel">
+
+          <p>in the SERVICE_URL and FILE_SERVER_ROOT spaces make sure you have http://SERVER_IP:8080 for SERVICE_URL and  
+              http://SERVER_IP:8080/seafhttp for FILE_SERVER_ROOT. I don't know why these aren't automatically assigned but
+              if they are improperly assigned then file upload will not work (arguably pretty important for a NAS ;P)
+          </p>
+
+          <p>Now seafile should be ready to go! I will also note that seafile has apps you can run on your PC and phone if
+            you don't want to always have to go through the website.
+          </p>
+
+          <br>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

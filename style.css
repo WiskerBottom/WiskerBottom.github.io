@@ -1,0 +1,132 @@
+body {
+  margin: 0;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: #0d111e;
+  color: #f8f9fa;
+}
+
+.navbar {
+  background: #1f2851;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.nav-container .logo {
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #f8f9fa;
+}
+
+.layout {
+  display: flex;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+.sidebar {
+  position: sticky; /* Add this line */
+  top: 25; /* Add this line */
+  height: 100vh; /* Add this line */
+  width: 250px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.sidebar h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #8ab4f8;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  padding: 0.5rem 0;
+  font-size: 1.125rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.recipes {
+  flex: 1;
+}
+
+.lightBlueContainer {
+  background: #193149;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.lightBlueContainer h3 {
+  margin: 1rem;
+  font-size: 2rem;
+  color: #a5d8ff;
+  text-align: center;
+}
+
+.textbox {
+  margin: 1rem;
+  background-color:  rgb(26,30,43); /* edit here rgb 13, 17, 30 */
+  color: #f8f9fa;
+  border-radius: 16px;
+}
+
+.textbox h3 {
+  margin: 1rem;
+  font-size: 2rem;
+  color: #a5d8ff;
+  text-align: center;
+}
+
+.textbox p {
+  font-size: 1.1rem;
+  margin-left: 4rem; /* Increased from 1rem to 2rem */
+  margin-right: 4rem; /* Added right margin property */
+  line-height: 1.5; /* Added line-height property to double-space text */
+}
+
+.textbox li {
+  font-size: 1.1rem;
+  margin-left: 4rem; /* Increased from 1rem to 2rem */
+  margin-right: 4rem; /* Added right margin property */
+  line-height: 1.5; /* Added line-height property to double-space text */
+}
+
+.lightBlueContainer img {
+  display: block; 
+  background-color: rgba(255,255,255,0.05);
+  margin: 2rem auto; /* Added top and bottom margins */
+  border-radius: 16px;
+}
+
+.code-box {
+  margin-left: 5rem;
+  margin-right: 7rem;
+  padding: 1rem;
+  background-color: rgb(36, 39, 51);
+  border-radius: 8px;
+}
+
+.code-box code {
+  font-family: monospace, monaco, consolas, courier new;
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+a {
+  color: inherit; /* Inherit the text color from the parent element */
+  text-decoration: underline; /* Add an underline to the hyperlink */
+}
+
+.chart-container {
+  border-radius: 8px;
+  padding: 1rem;
+  background: #193149;
+  margin: auto;
+  width: 50%;
+  height: 10%;
+}
